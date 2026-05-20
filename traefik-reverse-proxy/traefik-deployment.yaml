@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: staging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      containers:
+        - name: traefik
+          image: traefik:v3.1.6
+          volumeMounts:
+            - mountPath: "/etc/traefik"
+              name: traefik-config-volume
+          args:
+            - "--providers.kubernetescrd"
+            - "--entrypoints.web.address=:80"
+      volumes:
+        - name: traefik-config-volume
+          configMap:
+            name: traefik-config

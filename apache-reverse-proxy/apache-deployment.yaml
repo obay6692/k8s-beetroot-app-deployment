@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apache-proxy
+  namespace: staging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apache-proxy
+  template:
+    metadata:
+      labels:
+        app: apache-proxy
+    spec:
+      containers:
+      - name: apache-proxy
+        image: httpd:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: apache-config
+          mountPath: /usr/local/apache2/conf/httpd.conf
+          subPath: httpd.conf
+      volumes:
+      - name: apache-config
+        configMap:
+          name: apache-config

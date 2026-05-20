@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apache-config
+  namespace: staging
+data:
+  httpd.conf: |
+    ServerRoot "/usr/local/apache2"
+    Listen 80
+
+    LoadModule mpm_event_module modules/mod_mpm_event.so
+    LoadModule log_config_module modules/mod_log_config.so
+    LoadModule mime_module modules/mod_mime.so
+    LoadModule dir_module modules/mod_dir.so
+    LoadModule authz_core_module modules/mod_authz_core.so
+    LoadModule unixd_module modules/mod_unixd.so
+    LoadModule proxy_module modules/mod_proxy.so
+    LoadModule proxy_http_module modules/mod_proxy_http.so
+
+    TypesConfig conf/mime.types
+
+    PidFile logs/httpd.pid
+
+    User www-data
+    Group www-data
+
+    DocumentRoot "/usr/local/apache2/htdocs"
+
+    DirectoryIndex index.html
+
+    ErrorLog /proc/self/fd/2
+    LogLevel warn
+
+    LogFormat "%h %l %u %t \"%r\" %>s %b" common
+    CustomLog /proc/self/fd/1 common
+
+    <Directory />
+      AllowOverride None
+      Require all denied
+    </Directory>
+
+    <Directory "/usr/local/apache2/htdocs">
+      Require all granted
+    </Directory>
+
+    <VirtualHost *:80>
+        ProxyPreserveHost On
+        ProxyPass / http://beetroot-service:8080/
+        ProxyPassReverse / http://beetroot-service:8080/
+    </VirtualHost>

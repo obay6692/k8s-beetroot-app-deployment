@@ -1,0 +1,21 @@
+stages:
+  - build
+
+variables:
+  CONTAINER_REGISTRY: "registry.internal.uia.no"
+  CONTAINER_IMAGE: "${CONTAINER_REGISTRY}/ikt210-g-24h-skyinfrastruktur/labgroup21/exercise-02-deploy-k8s-manifest"
+
+
+build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    # Create Docker auth file for authentication
+    - echo "{\"auths\":{\"${CONTAINER_REGISTRY}\":{\"username\":\"$REGISTRY_USERNAME\",\"password\":\"$REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    # Use Kaniko to build and push the Docker image with the 'latest' tag only
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_IMAGE:latest
+  only:
+    - main
